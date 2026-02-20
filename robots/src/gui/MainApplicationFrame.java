@@ -3,6 +3,7 @@ package gui;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
+import java.util.Locale;
 
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
@@ -46,7 +47,14 @@ public class MainApplicationFrame extends JFrame
         addWindow(gameWindow);
 
         setJMenuBar(generateMenuBar());
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                ProgramExit.exit();
+            }
+        });
+
     }
     
     protected LogWindow createLogWindow()
@@ -137,6 +145,23 @@ public class MainApplicationFrame extends JFrame
 
         menuBar.add(lookAndFeelMenu);
         menuBar.add(testMenu);
+
+
+        JMenu exitMenu = new JMenu("Выход");
+        exitMenu.setMnemonic(KeyEvent.VK_T);
+        exitMenu.getAccessibleContext().setAccessibleDescription(
+                "Меню выхода");
+
+        {
+            JMenuItem addLogMessageItem = new JMenuItem("Выйти", KeyEvent.VK_S);
+            addLogMessageItem.addActionListener((event) -> {
+                ProgramExit.exit();
+            });
+            exitMenu.add(addLogMessageItem);
+        }
+
+        menuBar.add(lookAndFeelMenu);
+        menuBar.add(exitMenu);
         return menuBar;
     }
     
