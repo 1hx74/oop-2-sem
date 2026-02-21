@@ -2,13 +2,19 @@ package gui;
 
 import javax.swing.*;
 
-import static javax.swing.JOptionPane.showConfirmDialog;
-
 public class ProgramExit {
     public static void exit() {
-        int choose = showConfirmDialog(
-                null, "EXIT?", "title", JOptionPane.OK_CANCEL_OPTION, JOptionPane.ERROR_MESSAGE);
-
+        Object[] options = {"ОК", "Отмена"};
+        int choose = JOptionPane.showOptionDialog(
+                null,
+                "Выйти?",
+                "Подтверждение",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.ERROR_MESSAGE,
+                null,
+                options,
+                options[0]
+        );
         switch (choose) {
             case 0:
                 System.exit(0);

@@ -144,15 +144,26 @@ public class MainApplicationFrame extends JFrame
         menu.add(item);
     }
 
+    void localizeInternalFrame() {
+        UIManager.put("InternalFrameTitlePane.closeButtonText", "Закрыть");
+        UIManager.put("InternalFrameTitlePane.iconifyButtonText", "Свернуть");
+        UIManager.put("InternalFrameTitlePane.restoreButtonText", "Восстановить");
+        UIManager.put("InternalFrameTitlePane.maximizeButtonText", "Развернуть");
+        UIManager.put("InternalFrameTitlePane.minimizeButtonText", "Свернуть");
+        UIManager.put("InternalFrameTitlePane.moveButtonText", "Переместить");
+        UIManager.put("InternalFrameTitlePane.sizeButtonText", "Изменить размер");
+    }
+
     /**
      * Устанавливает Look and Feel приложения
      * @param className полное имя класса Look and Feel
      */
-    private void setLookAndFeel(String className)
+    void setLookAndFeel(String className)
     {
         try
         {
             UIManager.setLookAndFeel(className);
+            localizeInternalFrame();
             SwingUtilities.updateComponentTreeUI(this);
         }
         catch (ClassNotFoundException | InstantiationException
