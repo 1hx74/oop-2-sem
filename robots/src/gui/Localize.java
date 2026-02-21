@@ -34,5 +34,9 @@ public class Localize {
         UIManager.put("InternalFrameTitlePane.minimizeButtonText", tr("internal.minimize"));
         UIManager.put("InternalFrameTitlePane.moveButtonText", tr("internal.move"));
         UIManager.put("InternalFrameTitlePane.sizeButtonText", tr("internal.size"));
+        UIManager.put("InternalFrame.closeButtonToolTip", tr("internal.close"));
+        UIManager.put("InternalFrame.iconButtonToolTip", tr("internal.iconify"));
+        UIManager.put("InternalFrame.maxButtonToolTip", tr("internal.maximize"));
+        UIManager.put("InternalFrame.restoreButtonToolTip", tr("internal.minimize"));
     }
 }
