@@ -2,6 +2,7 @@ package gui;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.Locale;
 
@@ -18,27 +19,35 @@ import javax.swing.UnsupportedLookAndFeelException;
 import log.Logger;
 
 /**
- * Что требуется сделать:
- * 1. Метод создания меню перегружен функционалом и трудно читается. 
- * Следует разделить его на серию более простых методов (или вообще выделить отдельный класс).
- *
+ * Главная рамка приложения, содержащая рабочую область для внутренних окон (JInternalFrame)
+ * и панель меню. Позволяет добавлять окна и управлять внешним видом приложения
  */
 public class MainApplicationFrame extends JFrame
 {
     private final JDesktopPane desktopPane = new JDesktopPane();
-    
+
+    private final String defaultLookAndFeel;
+
+    /**
+     * Конструктор главного окна приложения
+     * Настраивает размеры окна с отступами от экрана, создаёт внутренние окна
+     * (лог и игровое), создаёт меню и настраивает обработку закрытия окна
+     */
     public MainApplicationFrame() {
         //Make the big window be indented 50 pixels from each edge
         //of the screen.
-        int inset = 50;        
+
+        defaultLookAndFeel = UIManager.getLookAndFeel().getClass().getName();
+
+        int inset = 50;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         setBounds(inset, inset,
-            screenSize.width  - inset*2,
-            screenSize.height - inset*2);
+                screenSize.width  - inset*2,
+                screenSize.height - inset*2);
 
         setContentPane(desktopPane);
-        
-        
+
+
         LogWindow logWindow = createLogWindow();
         addWindow(logWindow);
 
@@ -56,7 +65,12 @@ public class MainApplicationFrame extends JFrame
         });
 
     }
-    
+
+    /**
+     * Создаёт окно логирования приложения
+     * Настраивает его размер, положение и минимальный размер окна.
+     * @return созданное окно логирования
+     */
     protected LogWindow createLogWindow()
     {
         LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource());
@@ -67,104 +81,73 @@ public class MainApplicationFrame extends JFrame
         Logger.debug("Протокол работает");
         return logWindow;
     }
-    
+
+    /**
+     * Добавляет внутреннее окно (JInternalFrame) в рабочую область
+     * Делает окно видимым после добавления
+     * @param frame внутреннее окно для добавления
+     */
     protected void addWindow(JInternalFrame frame)
     {
         desktopPane.add(frame);
         frame.setVisible(true);
     }
-    
-//    protected JMenuBar createMenuBar() {
-//        JMenuBar menuBar = new JMenuBar();
-// 
-//        //Set up the lone menu.
-//        JMenu menu = new JMenu("Document");
-//        menu.setMnemonic(KeyEvent.VK_D);
-//        menuBar.add(menu);
-// 
-//        //Set up the first menu item.
-//        JMenuItem menuItem = new JMenuItem("New");
-//        menuItem.setMnemonic(KeyEvent.VK_N);
-//        menuItem.setAccelerator(KeyStroke.getKeyStroke(
-//                KeyEvent.VK_N, ActionEvent.ALT_MASK));
-//        menuItem.setActionCommand("new");
-////        menuItem.addActionListener(this);
-//        menu.add(menuItem);
-// 
-//        //Set up the second menu item.
-//        menuItem = new JMenuItem("Quit");
-//        menuItem.setMnemonic(KeyEvent.VK_Q);
-//        menuItem.setAccelerator(KeyStroke.getKeyStroke(
-//                KeyEvent.VK_Q, ActionEvent.ALT_MASK));
-//        menuItem.setActionCommand("quit");
-////        menuItem.addActionListener(this);
-//        menu.add(menuItem);
-// 
-//        return menuBar;
-//    }
-    
-    private JMenuBar generateMenuBar()
-    {
+
+    /**
+     * Создаёт панель меню приложения с пунктами
+     * @return объект JMenuBar для установки в JFrame
+     */
+    private JMenuBar generateMenuBar() {
         JMenuBar menuBar = new JMenuBar();
-        
-        JMenu lookAndFeelMenu = new JMenu("Режим отображения");
-        lookAndFeelMenu.setMnemonic(KeyEvent.VK_V);
-        lookAndFeelMenu.getAccessibleContext().setAccessibleDescription(
-                "Управление режимом отображения приложения");
-        
-        {
-            JMenuItem systemLookAndFeel = new JMenuItem("Системная схема", KeyEvent.VK_S);
-            systemLookAndFeel.addActionListener((event) -> {
-                setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                this.invalidate();
-            });
-            lookAndFeelMenu.add(systemLookAndFeel);
-        }
 
-        {
-            JMenuItem crossplatformLookAndFeel = new JMenuItem("Универсальная схема", KeyEvent.VK_S);
-            crossplatformLookAndFeel.addActionListener((event) -> {
-                setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-                this.invalidate();
-            });
-            lookAndFeelMenu.add(crossplatformLookAndFeel);
-        }
+        JMenu lookAndFeelMenu = createMenu("Режим отображения", KeyEvent.VK_V, "Управление режимом отображения приложения");
+        addMenuItem(lookAndFeelMenu, "Исходная схема", KeyEvent.VK_S,e -> { setLookAndFeel(defaultLookAndFeel); this.invalidate(); });
+        addMenuItem(lookAndFeelMenu, "Системная схема", KeyEvent.VK_S, e -> { setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); this.invalidate(); });
+        addMenuItem(lookAndFeelMenu, "Универсальная схема", KeyEvent.VK_S, e -> { setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName()); this.invalidate(); });
+        JMenu testMenu = createMenu("Тесты", KeyEvent.VK_T, "Тестовые команды");
+        addMenuItem(testMenu, "Сообщение в лог", KeyEvent.VK_S, e -> Logger.debug("Новая строка"));
 
-        JMenu testMenu = new JMenu("Тесты");
-        testMenu.setMnemonic(KeyEvent.VK_T);
-        testMenu.getAccessibleContext().setAccessibleDescription(
-                "Тестовые команды");
-        
-        {
-            JMenuItem addLogMessageItem = new JMenuItem("Сообщение в лог", KeyEvent.VK_S);
-            addLogMessageItem.addActionListener((event) -> {
-                Logger.debug("Новая строка");
-            });
-            testMenu.add(addLogMessageItem);
-        }
+        JMenu exitMenu = createMenu("Выход", KeyEvent.VK_T, "Меню выхода");
+        addMenuItem(exitMenu, "Выйти", KeyEvent.VK_S, e -> ProgramExit.exit());
 
         menuBar.add(lookAndFeelMenu);
         menuBar.add(testMenu);
-
-
-        JMenu exitMenu = new JMenu("Выход");
-        exitMenu.setMnemonic(KeyEvent.VK_T);
-        exitMenu.getAccessibleContext().setAccessibleDescription(
-                "Меню выхода");
-
-        {
-            JMenuItem addLogMessageItem = new JMenuItem("Выйти", KeyEvent.VK_S);
-            addLogMessageItem.addActionListener((event) -> {
-                ProgramExit.exit();
-            });
-            exitMenu.add(addLogMessageItem);
-        }
-
-        menuBar.add(lookAndFeelMenu);
         menuBar.add(exitMenu);
+
         return menuBar;
     }
-    
+
+    /**
+     * Создаёт меню с заданным названием, мнемоникой и доступным описанием
+     * @param title название меню
+     * @param mnemonic_key клавиша-мнемоник для быстрого доступа
+     * @param accessibleDescription описание для вспомогательных технологий
+     * @return объект JMenu с заданными параметрами
+     */
+    private JMenu createMenu(String title, int mnemonic_key, String accessibleDescription) {
+        JMenu menu = new JMenu(title);
+        menu.setMnemonic(mnemonic_key);
+        menu.getAccessibleContext().setAccessibleDescription(accessibleDescription);
+        return menu;
+    }
+
+    /**
+     * Добавляет пункт меню к существующему JMenu
+     * @param menu меню, к которому добавляется пункт
+     * @param title название пункта меню
+     * @param mnemonic_key клавиша-мнемоник для быстрого доступа
+     * @param action обработчик события при выборе пункта
+     */
+    private void addMenuItem(JMenu menu, String title, int mnemonic_key, ActionListener action) {
+        JMenuItem item = new JMenuItem(title, mnemonic_key);
+        item.addActionListener(action);
+        menu.add(item);
+    }
+
+    /**
+     * Устанавливает Look and Feel приложения
+     * @param className полное имя класса Look and Feel
+     */
     private void setLookAndFeel(String className)
     {
         try
@@ -173,7 +156,7 @@ public class MainApplicationFrame extends JFrame
             SwingUtilities.updateComponentTreeUI(this);
         }
         catch (ClassNotFoundException | InstantiationException
-            | IllegalAccessException | UnsupportedLookAndFeelException e)
+               | IllegalAccessException | UnsupportedLookAndFeelException e)
         {
             // just ignore
         }
