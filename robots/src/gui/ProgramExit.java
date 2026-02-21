@@ -3,12 +3,19 @@ package gui;
 import javax.swing.*;
 
 public class ProgramExit {
+
+    static private Localize localize;
+
+    ProgramExit(Localize localize) {
+        this.localize = localize;
+    }
+
     public static void exit() {
-        Object[] options = {"ОК", "Отмена"};
+        Object[] options = {localize.tr("window.exit.ok"), localize.tr("window.exit.cancel")};
         int choose = JOptionPane.showOptionDialog(
                 null,
-                "Выйти?",
-                "Подтверждение",
+                localize.tr("window.exit.exit?"),
+                localize.tr("window.exit.confirm"),
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.ERROR_MESSAGE,
                 null,

@@ -21,6 +21,6 @@ public class RobotsProgram
             frame.pack();
             frame.setVisible(true);
             frame.setExtendedState(Frame.MAXIMIZED_BOTH);
-            frame.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+            frame.setLookAndFeel();
         });
     }}
