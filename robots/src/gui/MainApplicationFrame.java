@@ -22,16 +22,14 @@ import log.Logger;
 public class MainApplicationFrame extends JFrame
 {
     private final JDesktopPane desktopPane = new JDesktopPane();
-    private String language = "en";
-    private String nowLookAndFeel;
-    private ResourceBundle bundle;
     private final String defaultLookAndFeel;
+    private String nowLookAndFeel;
     private Localize localize;
     private GameWindow gameWindow;
     private LogWindow logWindow;
 
     public MainApplicationFrame() {
-        localize = new Localize(language);
+        localize = new Localize("en");
         new ProgramExit(localize);
 
         defaultLookAndFeel = UIManager.getLookAndFeel().getClass().getName();
