@@ -43,12 +43,11 @@ public class MainApplicationFrame extends JFrame
 
         setContentPane(desktopPane);
 
+        gameWindow = createGameWindow();
+        addWindow(gameWindow);
+
         LogWindow logWindow = createLogWindow();
         addWindow(logWindow);
-
-        gameWindow = new GameWindow(localize);
-        gameWindow.setSize(400, 400);
-        addWindow(gameWindow);
 
         setJMenuBar(generateMenuBar());
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -60,10 +59,19 @@ public class MainApplicationFrame extends JFrame
         });
     }
 
+    protected GameWindow createGameWindow() {
+        GameWindow newGame = new GameWindow(localize);
+
+        newGame.setLocation(230, 10);
+        newGame.setSize(300, 300);
+        setMinimumSize(newGame.getSize());
+        return newGame;
+    }
+
     protected LogWindow createLogWindow() {
         logWindow = new LogWindow(localize, Logger.getDefaultLogSource());
         logWindow.setLocation(10, 10);
-        logWindow.setSize(300, 800);
+        logWindow.setSize(210, 400);
         setMinimumSize(logWindow.getSize());
         logWindow.pack();
         Logger.debug(localize.tr("log.started"));
