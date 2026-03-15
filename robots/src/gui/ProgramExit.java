@@ -5,9 +5,11 @@ import javax.swing.*;
 public class ProgramExit {
 
     static private Localize localize;
+    static private Runnable beforeExit;
 
-    ProgramExit(Localize localize) {
-        this.localize = localize;
+    ProgramExit(Localize localize, Runnable beforeExit) {
+        ProgramExit.localize = localize;
+        ProgramExit.beforeExit = beforeExit;
     }
 
     public static void exit() {
@@ -22,12 +24,12 @@ public class ProgramExit {
                 options,
                 options[0]
         );
-        switch (choose) {
-            case 0:
-                System.exit(0);
-                break;
-            case 1:
-                break;
+
+        if (choose == 0) {
+            if (beforeExit != null) {
+                beforeExit.run();
+            }
+            System.exit(0);
         }
     }
 }

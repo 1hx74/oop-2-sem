@@ -39,4 +39,8 @@ public class Localize {
         UIManager.put("InternalFrame.maxButtonToolTip", tr("internal.maximize"));
         UIManager.put("InternalFrame.restoreButtonToolTip", tr("internal.minimize"));
     }
+
+    public String getLocaleCode() {
+        return language;
+    }
 }

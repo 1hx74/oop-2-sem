@@ -4,8 +4,10 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Properties;
 
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
@@ -30,7 +32,7 @@ public class MainApplicationFrame extends JFrame
 
     public MainApplicationFrame() {
         localize = new Localize("en");
-        new ProgramExit(localize);
+        new ProgramExit(localize, this::saveState);
 
         defaultLookAndFeel = UIManager.getLookAndFeel().getClass().getName();
         nowLookAndFeel = defaultLookAndFeel;
@@ -46,7 +48,7 @@ public class MainApplicationFrame extends JFrame
         gameWindow = createGameWindow();
         addWindow(gameWindow);
 
-        LogWindow logWindow = createLogWindow();
+        logWindow = createLogWindow();
         addWindow(logWindow);
 
         setJMenuBar(generateMenuBar());
@@ -129,6 +131,46 @@ public class MainApplicationFrame extends JFrame
         JMenuItem item = new JMenuItem(title, mnemonic_key);
         item.addActionListener(action);
         menu.add(item);
+    }
+
+    private void saveState() {
+        Properties props = new Properties();
+
+        // locale
+        props.setProperty("locale.current", localize.getLocaleCode());
+
+        // main window
+        props.setProperty("main.title", String.valueOf(getTitle()));
+        props.setProperty("main.x", String.valueOf(getX()));
+        props.setProperty("main.y", String.valueOf(getY()));
+        props.setProperty("main.width", String.valueOf(getWidth()));
+        props.setProperty("main.height", String.valueOf(getHeight()));
+        props.setProperty("main.visible", String.valueOf(isVisible()));
+
+        // game window
+        saveFrame(props, "game", gameWindow);
+
+        // log window
+        saveFrame(props, "log", logWindow);
+
+        // path to desktop
+        Path file = Path.of(System.getProperty("user.home"), "Desktop", "app_state.properties");
+
+        try (FileOutputStream out = new FileOutputStream(file.toFile())) {
+            props.store(out, "Application State");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void saveFrame(Properties props, String prefix, JInternalFrame frame) {
+        props.setProperty(prefix + ".title", String.valueOf(frame.getTitle()));
+        props.setProperty(prefix + ".x", String.valueOf(frame.getX()));
+        props.setProperty(prefix + ".y", String.valueOf(frame.getY()));
+        props.setProperty(prefix + ".width", String.valueOf(frame.getWidth()));
+        props.setProperty(prefix + ".height", String.valueOf(frame.getHeight()));
+        props.setProperty(prefix + ".iconified", String.valueOf(frame.isIcon()));
+        props.setProperty(prefix + ".selected", String.valueOf(frame.isSelected()));
     }
 
     private void refreshUI() {

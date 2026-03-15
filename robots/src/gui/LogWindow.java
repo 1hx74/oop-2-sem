@@ -10,13 +10,13 @@ import log.LogChangeListener;
 import log.LogEntry;
 import log.LogWindowSource;
 
-public class LogWindow extends JInternalFrame implements LogChangeListener {
+public class LogWindow extends AbstractWindow implements LogChangeListener {
     private LogWindowSource m_logSource;
     private TextArea m_logContent;
     private Localize localize;
 
     public LogWindow(Localize localize, LogWindowSource logSource) {
-        super(localize.tr("window.log.name"), true, true, true, true);
+        super(localize);
         this.localize = localize;
         m_logSource = logSource;
         m_logSource.registerListener(this);
@@ -46,5 +46,10 @@ public class LogWindow extends JInternalFrame implements LogChangeListener {
     @Override
     public void onLogChanged() {
         EventQueue.invokeLater(this::updateLogContent);
+    }
+
+    @Override
+    public String getPathToName() {
+        return "window.log.name";
     }
 }
