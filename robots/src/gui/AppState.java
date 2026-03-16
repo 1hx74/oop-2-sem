@@ -10,7 +10,7 @@ public class AppState {
     private final Properties props = new Properties();
 
     private static Path getFile() {
-        return Path.of(System.getProperty("user.home"), "Desktop", "app_state.properties");
+        return Path.of("Robots", "src", "gui", "resources", "gui", "app_state.properties");
     }
 
     public static AppState load() {

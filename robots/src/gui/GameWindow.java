@@ -24,4 +24,9 @@ public class GameWindow extends AbstractWindow {
     public String getPathToName() {
         return "window.game.name";
     }
+
+    @Override
+    public String getPrefix() {
+        return "game";
+    }
 }

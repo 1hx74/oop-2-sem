@@ -51,16 +51,16 @@ public class MainApplicationFrame extends JFrame
         setContentPane(desktopPane);
 
         gameWindow = createGameWindow();
-        state.loadFrameGeometry("game", gameWindow, 230, 10, 300, 300);
+        state.loadFrameGeometry(gameWindow.getPrefix(), gameWindow, 230, 10, 300, 300);
         addWindow(gameWindow);
 
         logWindow = createLogWindow();
-        state.loadFrameGeometry("log", logWindow, 10, 10, 210, 400);
+        state.loadFrameGeometry(logWindow.getPrefix(), logWindow, 10, 10, 210, 400);
         addWindow(logWindow);
 
-        state.restoreFrameState("game", gameWindow);
+        state.restoreFrameState(gameWindow.getPrefix(), gameWindow);
         SwingUtilities.invokeLater(() -> {
-            state.restoreFrameState("log", logWindow);
+            state.restoreFrameState(logWindow.getPrefix(), logWindow);
             SwingUtilities.invokeLater(() -> {
                 // вручную слева направо
                 int x = 0;
@@ -74,10 +74,10 @@ public class MainApplicationFrame extends JFrame
                         x += iconWidth;
                     }
                 }
-                state.restoreSelectedFrame("game", gameWindow);
-                state.restoreSelectedFrame("log", logWindow);
+                state.restoreSelectedFrame(gameWindow.getPrefix(), gameWindow);
+                state.restoreSelectedFrame(logWindow.getPrefix(), logWindow);
             });
-        });
+        });         //
 
         setJMenuBar(generateMenuBar());
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -164,11 +164,15 @@ public class MainApplicationFrame extends JFrame
 
         state.setLocale(localize.getLocaleCode());
         state.setLookAndFeel(nowLookAndFeel);
-        state.saveFrame("main", this);
-        state.saveFrame("game", gameWindow);
-        state.saveFrame("log", logWindow);
+        state.saveFrame(this.getPrefix(), this);
+        state.saveFrame(gameWindow.getPrefix(), gameWindow);
+        state.saveFrame(logWindow.getPrefix(), logWindow);
 
         state.save();
+    }
+
+    private String getPrefix() {
+        return "main";
     }
 
     private void refreshUI() {

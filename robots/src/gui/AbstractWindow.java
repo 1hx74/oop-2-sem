@@ -23,4 +23,6 @@ public abstract class AbstractWindow extends JInternalFrame {
 
     public abstract String getPathToName();
 
+    public abstract String getPrefix();
+
 }

@@ -4,3 +4,4 @@
 /robots/.settings
 /robots/bin
 eclipse.bat
+/robots/src/gui/resources/gui/app_state.properties

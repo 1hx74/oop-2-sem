@@ -51,4 +51,9 @@ public class LogWindow extends AbstractWindow implements LogChangeListener {
     public String getPathToName() {
         return "window.log.name";
     }
+
+    @Override
+    public String getPrefix() {
+        return "log";
+    }
 }
