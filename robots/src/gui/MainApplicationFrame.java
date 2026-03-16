@@ -1,13 +1,8 @@
 package gui;
 
-import java.awt.Dimension;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Properties;
 
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
@@ -29,13 +24,23 @@ public class MainApplicationFrame extends JFrame
     private Localize localize;
     private GameWindow gameWindow;
     private LogWindow logWindow;
+    private AppState state;
 
     public MainApplicationFrame() {
-        localize = new Localize("en");
+
+        state = AppState.load();
+        localize = new Localize(state.getLocale());
+
         new ProgramExit(localize, this::saveState);
 
         defaultLookAndFeel = UIManager.getLookAndFeel().getClass().getName();
         nowLookAndFeel = defaultLookAndFeel;
+
+        String savedLaf = state.getLookAndFeel();
+        if (savedLaf != null) {
+            nowLookAndFeel = savedLaf;
+            setLookAndFeel();
+        }
 
         int inset = 50;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -46,10 +51,33 @@ public class MainApplicationFrame extends JFrame
         setContentPane(desktopPane);
 
         gameWindow = createGameWindow();
+        state.loadFrameGeometry("game", gameWindow, 230, 10, 300, 300);
         addWindow(gameWindow);
 
         logWindow = createLogWindow();
+        state.loadFrameGeometry("log", logWindow, 10, 10, 210, 400);
         addWindow(logWindow);
+
+        state.restoreFrameState("game", gameWindow);
+        SwingUtilities.invokeLater(() -> {
+            state.restoreFrameState("log", logWindow);
+            SwingUtilities.invokeLater(() -> {
+                // вручную слева направо
+                int x = 0;
+                for (JInternalFrame frame : desktopPane.getAllFrames()) {
+                    if (frame.isIcon()) {
+                        JInternalFrame.JDesktopIcon icon = frame.getDesktopIcon();
+                        int iconWidth = icon.getWidth();
+                        int iconHeight = icon.getHeight();
+                        int y = desktopPane.getHeight() - iconHeight;
+                        icon.setLocation(x, y);
+                        x += iconWidth;
+                    }
+                }
+                state.restoreSelectedFrame("game", gameWindow);
+                state.restoreSelectedFrame("log", logWindow);
+            });
+        });
 
         setJMenuBar(generateMenuBar());
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -63,7 +91,6 @@ public class MainApplicationFrame extends JFrame
 
     protected GameWindow createGameWindow() {
         GameWindow newGame = new GameWindow(localize);
-
         newGame.setLocation(230, 10);
         newGame.setSize(300, 300);
         setMinimumSize(newGame.getSize());
@@ -134,43 +161,14 @@ public class MainApplicationFrame extends JFrame
     }
 
     private void saveState() {
-        Properties props = new Properties();
 
-        // locale
-        props.setProperty("locale.current", localize.getLocaleCode());
+        state.setLocale(localize.getLocaleCode());
+        state.setLookAndFeel(nowLookAndFeel);
+        state.saveFrame("main", this);
+        state.saveFrame("game", gameWindow);
+        state.saveFrame("log", logWindow);
 
-        // main window
-        props.setProperty("main.title", String.valueOf(getTitle()));
-        props.setProperty("main.x", String.valueOf(getX()));
-        props.setProperty("main.y", String.valueOf(getY()));
-        props.setProperty("main.width", String.valueOf(getWidth()));
-        props.setProperty("main.height", String.valueOf(getHeight()));
-        props.setProperty("main.visible", String.valueOf(isVisible()));
-
-        // game window
-        saveFrame(props, "game", gameWindow);
-
-        // log window
-        saveFrame(props, "log", logWindow);
-
-        // path to desktop
-        Path file = Path.of(System.getProperty("user.home"), "Desktop", "app_state.properties");
-
-        try (FileOutputStream out = new FileOutputStream(file.toFile())) {
-            props.store(out, "Application State");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void saveFrame(Properties props, String prefix, JInternalFrame frame) {
-        props.setProperty(prefix + ".title", String.valueOf(frame.getTitle()));
-        props.setProperty(prefix + ".x", String.valueOf(frame.getX()));
-        props.setProperty(prefix + ".y", String.valueOf(frame.getY()));
-        props.setProperty(prefix + ".width", String.valueOf(frame.getWidth()));
-        props.setProperty(prefix + ".height", String.valueOf(frame.getHeight()));
-        props.setProperty(prefix + ".iconified", String.valueOf(frame.isIcon()));
-        props.setProperty(prefix + ".selected", String.valueOf(frame.isSelected()));
+        state.save();
     }
 
     private void refreshUI() {

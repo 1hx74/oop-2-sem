@@ -13,12 +13,16 @@ public class ProgramExit {
     }
 
     public static void exit() {
-        Object[] options = {localize.tr("window.exit.ok"), localize.tr("window.exit.cancel")};
+        Object[] options = {
+                localize.tr("window.exit.save"),
+                localize.tr("window.exit.close"),
+                localize.tr("window.exit.cancel")
+        };
         int choose = JOptionPane.showOptionDialog(
                 null,
                 localize.tr("window.exit.exit?"),
                 localize.tr("window.exit.confirm"),
-                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.YES_NO_CANCEL_OPTION,
                 JOptionPane.ERROR_MESSAGE,
                 null,
                 options,
@@ -29,6 +33,8 @@ public class ProgramExit {
             if (beforeExit != null) {
                 beforeExit.run();
             }
+            System.exit(0);
+        } else if (choose == 1) {
             System.exit(0);
         }
     }

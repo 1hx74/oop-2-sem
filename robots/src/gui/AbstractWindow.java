@@ -1,6 +1,5 @@
 package gui;
 
-import java.awt.Rectangle;
 import javax.swing.JInternalFrame;
 
 public abstract class AbstractWindow extends JInternalFrame {
@@ -10,20 +9,18 @@ public abstract class AbstractWindow extends JInternalFrame {
         super("", true, true, true, true);
         this.localize = localize;
         setTitle(localize.tr(getPathToName()));
+
+        setDefaultCloseOperation(JInternalFrame.DO_NOTHING_ON_CLOSE);
+        addInternalFrameListener(new javax.swing.event.InternalFrameAdapter() {
+            @Override
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent e) {
+                try {
+                    setIcon(true);
+                } catch (Exception ignored) {}
+            }
+        });
     }
 
     public abstract String getPathToName();
 
-    /**
-     * Возвращает информацию о текущем состоянии окна:
-     * - bounds: положение и размеры (x, y, width, height)
-     * - isIcon: свернуто ли окно
-     * - isSelected: в фокусе ли окно
-     */
-    public WindowState getWindowState() {
-        Rectangle bounds = getBounds();
-        boolean isIcon = isIcon();
-        boolean isSelected = isSelected();
-        return new WindowState(bounds, isIcon, isSelected);
-    }
 }

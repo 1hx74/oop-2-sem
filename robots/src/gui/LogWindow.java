@@ -2,8 +2,6 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import java.awt.TextArea;
-
 import javax.swing.*;
 
 import log.LogChangeListener;
@@ -12,7 +10,7 @@ import log.LogWindowSource;
 
 public class LogWindow extends AbstractWindow implements LogChangeListener {
     private LogWindowSource m_logSource;
-    private TextArea m_logContent;
+    private JTextArea m_logContent;
     private Localize localize;
 
     public LogWindow(Localize localize, LogWindowSource logSource) {
@@ -20,11 +18,13 @@ public class LogWindow extends AbstractWindow implements LogChangeListener {
         this.localize = localize;
         m_logSource = logSource;
         m_logSource.registerListener(this);
-        m_logContent = new TextArea("");
-        m_logContent.setSize(200, 500);
+
+        m_logContent = new JTextArea("");
+        m_logContent.setEditable(false);
+        m_logContent.setFocusable(false);
 
         JPanel panel = new JPanel(new BorderLayout());
-        panel.add(m_logContent, BorderLayout.CENTER);
+        panel.add(new JScrollPane(m_logContent), BorderLayout.CENTER);
         getContentPane().add(panel);
         pack();
         updateLogContent();
@@ -36,7 +36,6 @@ public class LogWindow extends AbstractWindow implements LogChangeListener {
             content.append(entry.getMessage()).append("\n");
         }
         m_logContent.setText(content.toString());
-        m_logContent.invalidate();
     }
 
     public void updateLocalization() {
