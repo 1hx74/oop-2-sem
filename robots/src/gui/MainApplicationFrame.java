@@ -3,6 +3,7 @@ package gui;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.Arrays;
 
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
@@ -24,6 +25,7 @@ public class MainApplicationFrame extends JFrame
     private Localize localize;
     private GameWindow gameWindow;
     private LogWindow logWindow;
+    private RobotStateWindow robotStateWindow;
     private AppState state;
 
     public MainApplicationFrame() {
@@ -54,6 +56,10 @@ public class MainApplicationFrame extends JFrame
         state.loadFrameGeometry(gameWindow.getPrefix(), gameWindow, 230, 10, 300, 300);
         addWindow(gameWindow);
 
+        robotStateWindow = new RobotStateWindow(localize, gameWindow.getRobotState());
+        state.loadFrameGeometry(robotStateWindow.getPrefix(), robotStateWindow, 540, 10, 300, 60);
+        addWindow(robotStateWindow);
+
         logWindow = createLogWindow();
         state.loadFrameGeometry(logWindow.getPrefix(), logWindow, 10, 10, 210, 400);
         addWindow(logWindow);
@@ -61,8 +67,9 @@ public class MainApplicationFrame extends JFrame
         state.restoreFrameState(gameWindow.getPrefix(), gameWindow);
         SwingUtilities.invokeLater(() -> {
             state.restoreFrameState(logWindow.getPrefix(), logWindow);
+            state.restoreFrameState(robotStateWindow.getPrefix(), robotStateWindow);
             SwingUtilities.invokeLater(() -> {
-                // вручную слева направо
+                // иконки слева направо
                 int x = 0;
                 for (JInternalFrame frame : desktopPane.getAllFrames()) {
                     if (frame.isIcon()) {
@@ -74,10 +81,29 @@ public class MainApplicationFrame extends JFrame
                         x += iconWidth;
                     }
                 }
-                state.restoreSelectedFrame(gameWindow.getPrefix(), gameWindow);
-                state.restoreSelectedFrame(logWindow.getPrefix(), logWindow);
+
+                // восстанавливаем z-order от дальнего к ближнему
+                JInternalFrame[] frames = {gameWindow, logWindow, robotStateWindow};
+                Arrays.sort(frames, (a, b) -> {
+                    int za = Integer.parseInt(state.getProperty(((AbstractWindow)a).getPrefix() + ".zorder", "0"));
+                    int zb = Integer.parseInt(state.getProperty(((AbstractWindow)b).getPrefix() + ".zorder", "0"));
+                    return Integer.compare(zb, za);
+                });
+                for (JInternalFrame frame : frames) {
+                    frame.toFront();
+                }
+
+                for (JInternalFrame frame : new JInternalFrame[]{gameWindow, logWindow, robotStateWindow}) {
+                    String prefix = ((AbstractWindow) frame).getPrefix();
+                    boolean selected = Boolean.parseBoolean(state.getProperty(prefix + ".selected", "false"));
+                    boolean iconified = Boolean.parseBoolean(state.getProperty(prefix + ".iconified", "false"));
+                    if (selected && !iconified) {
+                        try { frame.setSelected(true); } catch (Exception ignored) {}
+                        break;
+                    }
+                }
             });
-        });         //
+        });
 
         setJMenuBar(generateMenuBar());
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -167,6 +193,7 @@ public class MainApplicationFrame extends JFrame
         state.saveFrame(this.getPrefix(), this);
         state.saveFrame(gameWindow.getPrefix(), gameWindow);
         state.saveFrame(logWindow.getPrefix(), logWindow);
+        state.saveFrame(robotStateWindow.getPrefix(), robotStateWindow);
 
         state.save();
     }
@@ -181,6 +208,7 @@ public class MainApplicationFrame extends JFrame
         SwingUtilities.updateComponentTreeUI(this);
         gameWindow.updateLocalization();
         logWindow.updateLocalization();
+        robotStateWindow.updateLocalization();
     }
 
     void setLookAndFeel() {

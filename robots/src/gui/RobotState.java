@@ -1,5 +1,8 @@
 package gui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class RobotState {
     private volatile double positionX;
     private volatile double positionY;
@@ -8,10 +11,22 @@ public class RobotState {
     private static final double maxVelocity = 0.1;
     private static final double maxAngularVelocity = 0.001;
 
+    private final List<Runnable> observers = new ArrayList<>();
+
     public RobotState(double positionX, double positionY, double direction) {
         this.positionX = positionX;
         this.positionY = positionY;
         this.direction = direction;
+    }
+
+    public void addObserver(Runnable observer) {
+        observers.add(observer);
+    }
+
+    private void notifyObservers() {
+        for (Runnable observer : observers) {
+            observer.run();
+        }
     }
 
     public double getPositionX() { return positionX; }
@@ -32,6 +47,7 @@ public class RobotState {
             angularVelocity = -maxAngularVelocity;
         }
         move(maxVelocity, angularVelocity, 10);
+        notifyObservers();
     }
 
     private void move(double velocity, double angularVelocity, double duration) {
@@ -74,8 +90,8 @@ public class RobotState {
     }
 
     private static double asNormalizedRadians(double angle) {
-        while (angle < 0)             { angle += 2 * Math.PI; }
-        while (angle >= 2 * Math.PI)  { angle -= 2 * Math.PI; }
+        while (angle < 0)            { angle += 2 * Math.PI; }
+        while (angle >= 2 * Math.PI) { angle -= 2 * Math.PI; }
         return angle;
     }
 }

@@ -31,6 +31,10 @@ public class AppState {
         }
     }
 
+    public String getProperty(String key, String defaultValue) {
+        return props.getProperty(key, defaultValue);
+    }
+
     public String getLookAndFeel() {
         return props.getProperty("lookAndFeel", null);
     }
@@ -55,6 +59,10 @@ public class AppState {
         props.setProperty(prefix + ".height", String.valueOf(frame.getHeight()));
         props.setProperty(prefix + ".iconified", String.valueOf(frame.isIcon()));
         props.setProperty(prefix + ".selected", String.valueOf(frame.isSelected()));
+        JDesktopPane desktop = frame.getDesktopPane();
+        if (desktop != null) {
+            props.setProperty(prefix + ".zorder", String.valueOf(desktop.getIndexOf(frame)));
+        }
     }
 
     public void saveFrame(String prefix, JFrame frame) {

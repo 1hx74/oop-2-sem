@@ -120,4 +120,8 @@ public class GameVisualizer extends JPanel
         g.setColor(Color.BLACK);
         drawOval(g, target.getPositionX(), target.getPositionY(), 5, 5);
     }
+
+    public RobotState getRobotState() {
+        return m_robot;
+    }
 }

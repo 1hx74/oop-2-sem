@@ -29,4 +29,8 @@ public class GameWindow extends AbstractWindow {
     public String getPrefix() {
         return "game";
     }
+
+    public RobotState getRobotState() {
+        return  m_visualizer.getRobotState();
+    }
 }
