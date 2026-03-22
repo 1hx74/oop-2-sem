@@ -38,15 +38,23 @@ public class RobotState {
         if (distance < 0.5) {
             return;
         }
+
         double angleToTarget = angleTo(positionX, positionY, target.getPositionX(), target.getPositionY());
-        double angularVelocity = 0;
-        if (angleToTarget > direction) {
-            angularVelocity = maxAngularVelocity;
-        }
-        if (angleToTarget < direction) {
-            angularVelocity = -maxAngularVelocity;
-        }
-        move(maxVelocity, angularVelocity, 10);
+        double angleDiff = asNormalizedRadians(angleToTarget - direction);
+        // в диапазон [-пи, пи] для корректного знака поворота
+        if (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+
+        double angularVelocity = applyLimits(
+                angleDiff * 0.1,
+                -maxAngularVelocity,
+                maxAngularVelocity
+        );
+
+        // замедление при подъезде к цели и когда смотрим в сторону
+        double alignFactor = Math.max(0, Math.cos(angleDiff)); // 1 — точно в цель, 0 — перпендикуляр/назад
+        double velocity = maxVelocity * alignFactor * Math.min(1.0, distance / 50.0);
+
+        move(velocity, angularVelocity, 10);
         notifyObservers();
     }
 
