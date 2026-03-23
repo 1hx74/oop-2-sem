@@ -22,7 +22,7 @@ public class RobotStateWindow extends AbstractWindow {
         getContentPane().add(panel);
         updateLabel();
         pack();
-        setSize(300, 60);
+        // setSize(300, 60);
         setResizable(false);
     }
 

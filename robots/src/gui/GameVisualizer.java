@@ -23,11 +23,13 @@ public class GameVisualizer extends JPanel
         return timer;
     }
 
-    private final RobotState m_robot = new RobotState(100, 100, 0);
-    private final TargetState m_target = new TargetState(150, 100);
+    private final RobotState m_robot;
+    private final TargetState m_target;
 
-    public GameVisualizer()
+    public GameVisualizer(RobotState m_robot,  TargetState m_target)
     {
+        this.m_robot = m_robot;
+        this.m_target = m_target;
         m_timer.schedule(new TimerTask()
         {
             @Override
@@ -119,9 +121,5 @@ public class GameVisualizer extends JPanel
         fillOval(g, target.getPositionX(), target.getPositionY(), 5, 5);
         g.setColor(Color.BLACK);
         drawOval(g, target.getPositionX(), target.getPositionY(), 5, 5);
-    }
-
-    public RobotState getRobotState() {
-        return m_robot;
     }
 }

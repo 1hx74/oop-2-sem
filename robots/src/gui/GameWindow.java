@@ -6,9 +6,9 @@ import javax.swing.JPanel;
 public class GameWindow extends AbstractWindow {
     private final GameVisualizer m_visualizer;
 
-    public GameWindow(Localize localize) {
+    public GameWindow(Localize localize, RobotState robotState, TargetState targetState) {
         super(localize);
-        m_visualizer = new GameVisualizer();
+        m_visualizer = new GameVisualizer(robotState, targetState);
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(m_visualizer, BorderLayout.CENTER);
@@ -28,9 +28,5 @@ public class GameWindow extends AbstractWindow {
     @Override
     public String getPrefix() {
         return "game";
-    }
-
-    public RobotState getRobotState() {
-        return  m_visualizer.getRobotState();
     }
 }

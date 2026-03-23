@@ -28,6 +28,9 @@ public class MainApplicationFrame extends JFrame
     private RobotStateWindow robotStateWindow;
     private AppState state;
 
+    private final RobotState m_robot;
+    private final TargetState m_target;
+
     public MainApplicationFrame() {
 
         state = AppState.load();
@@ -52,17 +55,12 @@ public class MainApplicationFrame extends JFrame
 
         setContentPane(desktopPane);
 
-        gameWindow = createGameWindow();
-        state.loadFrameGeometry(gameWindow.getPrefix(), gameWindow, 230, 10, 300, 300);
-        addWindow(gameWindow);
+        m_robot = new RobotState(100, 100, 0);
+        m_target = new TargetState(150, 100);
 
-        robotStateWindow = new RobotStateWindow(localize, gameWindow.getRobotState());
-        state.loadFrameGeometry(robotStateWindow.getPrefix(), robotStateWindow, 540, 10, 300, 60);
-        addWindow(robotStateWindow);
-
-        logWindow = createLogWindow();
-        state.loadFrameGeometry(logWindow.getPrefix(), logWindow, 10, 10, 210, 400);
-        addWindow(logWindow);
+        createWindow(createGameWindow(), 230, 10, 300, 300);
+        createWindow(createStateWindow(), 540, 10, 300, 60);
+        createWindow(createLogWindow(), 10, 10, 210, 400);
 
         state.restoreFrameState(gameWindow.getPrefix(), gameWindow);
         SwingUtilities.invokeLater(() -> {
@@ -116,11 +114,18 @@ public class MainApplicationFrame extends JFrame
     }
 
     protected GameWindow createGameWindow() {
-        GameWindow newGame = new GameWindow(localize);
-        newGame.setLocation(230, 10);
-        newGame.setSize(300, 300);
-        setMinimumSize(newGame.getSize());
-        return newGame;
+        gameWindow = new GameWindow(localize, m_robot, m_target);
+        gameWindow.setLocation(230, 10);
+        gameWindow.setSize(300, 300);
+        setMinimumSize(gameWindow.getSize());
+        return gameWindow;
+    }
+
+    protected RobotStateWindow createStateWindow() {
+        robotStateWindow = new RobotStateWindow(localize, m_robot);
+        robotStateWindow.setLocation(540, 10);
+        robotStateWindow.setSize(300, 60);
+        return robotStateWindow;
     }
 
     protected LogWindow createLogWindow() {
@@ -131,6 +136,11 @@ public class MainApplicationFrame extends JFrame
         logWindow.pack();
         Logger.debug(localize.tr("log.started"));
         return logWindow;
+    }
+
+    protected void createWindow(AbstractWindow window, int x, int y, int w, int h) {
+        state.loadFrameGeometry(window.getPrefix(), window, x, y, w, h);
+        addWindow(window);
     }
 
     protected void addWindow(JInternalFrame frame) {
