@@ -8,10 +8,12 @@ import javax.swing.SwingUtilities;
 public class RobotStateWindow extends AbstractWindow {
     private final RobotState m_robotState;
     private final JLabel m_label = new JLabel();
+    private final FormatCombo formatCombo;
 
     public RobotStateWindow(Localize localize, RobotState robotState) {
         super(localize);
         this.m_robotState = robotState;
+        formatCombo = new FormatCombo(localize, m_robotState, FormatCombo.Mode.STRING_BUILDER);
 
         m_robotState.addObserver(() ->
                 SwingUtilities.invokeLater(this::updateLabel)
@@ -27,14 +29,7 @@ public class RobotStateWindow extends AbstractWindow {
     }
 
     private void updateLabel() {
-        m_label.setText(String.format("%s: %.2f  %s: %.2f  %s: %.1f%s",
-                localize.tr("window.robotstate.x"),
-                m_robotState.getPositionX(),
-                localize.tr("window.robotstate.y"),
-                m_robotState.getPositionY(),
-                localize.tr("window.robotstate.dir"),
-                Math.toDegrees(m_robotState.getDirection()),
-                localize.tr("window.robotstate.degrees")));
+        m_label.setText(formatCombo.get());
     }
 
     public void updateLocalization() {
