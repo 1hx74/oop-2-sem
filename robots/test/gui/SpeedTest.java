@@ -2,7 +2,7 @@ package gui;
 
 public class SpeedTest {
 
-    private static final int ITERATIONS = 1000_000;
+    private static final int ITERATIONS = 1_000_000;
 
     // фиктивные
     private static final double X       = 1.11;
@@ -35,10 +35,10 @@ public class SpeedTest {
         // print
         System.out.println("for iterations: " + ITERATIONS);
 
-        System.out.println(t1 + " formater");
-        System.out.println(t2 + " format_no_cache");
-        System.out.println(t3 + " format_cache");
-        System.out.println(t4 + " string_builder");
+        System.out.println(cifirkiFormat(t1, 16) + " formater");
+        System.out.println(cifirkiFormat(t2, 16) + " format_no_cache");
+        System.out.println(cifirkiFormat(t3, 16) + " format_cache");
+        System.out.println(cifirkiFormat(t4, 16) + " string_builder");
     }
 
     private void runIters(FormatCombo.Mode mode) {
@@ -52,5 +52,25 @@ public class SpeedTest {
         long start = System.nanoTime();
         r.run();
         return System.nanoTime() - start;
+    }
+
+    private String cifirkiFormat(long x, int len) {
+        String result = "";
+        String str = String.valueOf(x);
+        int count = 0;
+
+        for (int i = str.length() - 1; i >= 0; i--) {
+            result = str.charAt(i) + result;
+            count++;
+            if (count % 3 == 0 && i != 0) {
+                result = "_" + result;
+            }
+        }
+
+        int lenResult = result.length();
+        for (int i = 0; i < len - lenResult; i++) {
+            result = " " + result;
+        }
+        return result;
     }
 }
