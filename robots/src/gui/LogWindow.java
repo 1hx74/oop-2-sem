@@ -1,7 +1,7 @@
 package gui;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 import javax.swing.*;
 
 import log.LogChangeListener;
@@ -13,6 +13,11 @@ public class LogWindow extends AbstractWindow implements LogChangeListener {
     private JTextArea m_logContent;
     private Localize localize;
 
+    private JButton btnUp;
+    private JButton btnDown;
+
+    private long offset = 0;
+
     public LogWindow(Localize localize, LogWindowSource logSource) {
         super(localize);
         this.localize = localize;
@@ -23,19 +28,84 @@ public class LogWindow extends AbstractWindow implements LogChangeListener {
         m_logContent.setEditable(false);
         m_logContent.setFocusable(false);
 
+        btnUp = new JButton("▲");
+        btnDown = new JButton("▼");
+
+        btnUp.addActionListener(this::scrollUp);
+        btnDown.addActionListener(this::scrollDown);
+
+        JPanel buttons = new JPanel(new GridLayout(2, 1));
+        buttons.add(btnUp);
+        buttons.add(btnDown);
+
         JPanel panel = new JPanel(new BorderLayout());
-        panel.add(new JScrollPane(m_logContent), BorderLayout.CENTER);
+        panel.add(m_logContent, BorderLayout.CENTER);
+        panel.add(buttons, BorderLayout.EAST);
+
         getContentPane().add(panel);
-        pack();
+        setSize(400, 300);
+
+        moveToBottom();
+
         updateLogContent();
     }
 
+    private int getVisibleLineCount() {
+        int height = m_logContent.getHeight();
+        int lineHeight = m_logContent.getFontMetrics(m_logContent.getFont()).getHeight();
+
+        if (lineHeight == 0) return 10;
+
+        return Math.max(1, height / lineHeight);
+    }
+
+    private void moveToBottom() {
+        int visible = getVisibleLineCount();
+        long total = m_logSource.size();
+        offset = Math.max(0, total - visible);
+    }
+
+    private void scrollUp(ActionEvent e) {
+        int visible = getVisibleLineCount();
+        int step = Math.max(1, visible / 2);
+        offset = Math.max(0, offset - step);
+        updateLogContent();
+    }
+
+    private void scrollDown(ActionEvent e) {
+        int visible = getVisibleLineCount();
+        int step = Math.max(1, visible / 2);
+        long total = m_logSource.size();
+        offset = Math.min(total - visible, offset + step);
+        updateLogContent();
+    }
+
+    private void updateButtons() {
+        int visible = getVisibleLineCount();
+        long total = m_logSource.size();
+
+        btnUp.setEnabled(offset > 0);
+        btnDown.setEnabled(offset + visible < total);
+    }
+
     private void updateLogContent() {
+        int visibleLines = getVisibleLineCount();
+        long total = m_logSource.size();
+
+        // защита от выхода за границы
+        if (offset > total) {
+            offset = Math.max(0, total - visibleLines);
+        }
+
         StringBuilder content = new StringBuilder();
-        for (LogEntry entry : m_logSource.all()) {
+
+        for (LogEntry entry : m_logSource.range(offset, visibleLines)) {
             content.append(entry.getMessage()).append("\n");
         }
+
         m_logContent.setText(content.toString());
+
+        updateButtons();
     }
 
     public void updateLocalization() {
@@ -44,7 +114,16 @@ public class LogWindow extends AbstractWindow implements LogChangeListener {
 
     @Override
     public void onLogChanged() {
-        EventQueue.invokeLater(this::updateLogContent);
+        EventQueue.invokeLater(() -> {
+            int visible = getVisibleLineCount();
+            long total = m_logSource.size();
+
+            if (offset + visible >= total - visible) {
+                moveToBottom();
+            }
+
+            updateLogContent();
+        });
     }
 
     @Override

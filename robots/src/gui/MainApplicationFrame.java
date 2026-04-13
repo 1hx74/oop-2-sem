@@ -161,6 +161,7 @@ public class MainApplicationFrame extends JFrame
 
         JMenu testMenu = createMenu(localize.tr("menu.tests"), KeyEvent.VK_T, localize.tr("menu.tests"));
         addMenuItem(testMenu, localize.tr("menu.tests.log"), KeyEvent.VK_S, e -> Logger.debug(localize.tr("menu.tests.log")));
+        addMenuItem(testMenu, localize.tr("menu.tests.log2"), KeyEvent.VK_D, e -> Logger.debug(localize.tr("menu.tests.log2")));
 
         JMenu localMenu = createMenu(localize.tr("menu.locale"), KeyEvent.VK_T, localize.tr("menu.locale"));
         addMenuItem(localMenu, localize.tr("menu.locale.en"), KeyEvent.VK_E, e -> {
